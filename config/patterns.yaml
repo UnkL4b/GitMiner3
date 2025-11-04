@@ -1,0 +1,75 @@
+# GitMiner v3 - Patterns Configuration
+# Defines regex patterns for detecting sensitive information
+# Format: PATTERN_NAME: "regex_pattern"
+
+# Email Addresses
+EMAIL: "[a-zA-Z0-9.\\-_+%]{1,64}@[a-zA-Z0-9.\\-]{1,253}\\.[a-zA-Z]{2,}"
+
+# AWS Credentials
+AWS_ACCESS_KEY_ID: "AKIA[0-9A-Z]{16}"
+AWS_SECRET_ACCESS_KEY: "(?i)(aws[_\\- ]?secret[_\\- ]?access[_\\- ]?key|aws[_\\- ]?secret)[\"'\\s:=]{0,3}([A-Za-z0-9/+=]{40,50})"
+
+# GitHub Tokens
+GITHUB_TOKEN: "ghp_[A-Za-z0-9_]{36,255}"
+GITHUB_CLASSIC_TOKEN: "gh[pousr]_[A-Za-z0-9_]{36,255}"
+
+# JWT Tokens
+JWT: "eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}"
+
+# SSH Private Keys
+SSH_PRIVATE_KEY: "-----BEGIN (?:OPENSSH|RSA|DSA|EC|ENCRYPTED PRIVATE KEY)-----"
+PRIVATE_KEY_INLINE: "-----BEGIN PRIVATE KEY-----"
+
+# Certificates
+PEM_CERT: "-----BEGIN CERTIFICATE-----"
+
+# URLs with Credentials
+URL_WITH_CREDENTIALS: "https?://[^/\\s:@]+:[^@\\s/]+@"
+
+# Base64 Encoded Data (long strings)
+BASE64_LONG: "\\b(?:[A-Za-z0-9+/]{40,}={0,2})\\b"
+
+# High Entropy Strings
+HIGH_ENTROPY: "\\b[A-Za-z0-9\\-_]{30,}\\b"
+
+# Password Assignments
+POSSIBLE_PASSWORD_ASSIGN: "(?i)(password|passwd|pwd|pass)[\"'\\s]*[:=]\\s*[\"']?([^\"'\\s;,#]{4,200})"
+
+# URL Parameters with Secrets
+URL_SECRET_PARAM: "([?&](?:token|access_token|auth|apikey|key|secret)=)([^&\\s]{6,300})"
+
+# Hexadecimal Strings (potential keys)
+HEX_LONG: "\\b[a-fA-F0-9]{32,}\\b"
+
+# Slack Tokens
+SLACK_TOKEN: "xox[baprs]-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24,32}"
+
+# Google API Keys
+GOOGLE_API_KEY: "AIza[0-9A-Za-z\\-_]{35}"
+
+# Stripe Keys
+STRIPE_KEY: "sk_live_[0-9a-zA-Z]{24,}"
+STRIPE_RESTRICTED_KEY: "rk_live_[0-9a-zA-Z]{24,}"
+
+# Twilio Keys
+TWILIO_API_KEY: "SK[a-z0-9]{32}"
+
+# SendGrid API Keys
+SENDGRID_API_KEY: "SG\\.[a-zA-Z0-9_-]{22}\\.[a-zA-Z0-9_-]{43}"
+
+# Mailgun API Keys
+MAILGUN_API_KEY: "key-[a-zA-Z0-9]{32}"
+
+# Azure Storage Keys
+AZURE_STORAGE_KEY: "(?i)(DefaultEndpointsProtocol=https;AccountName=[^;]+;AccountKey=)([^;]+)"
+
+# Generic API Keys (broad pattern)
+GENERIC_API_KEY: "(?i)(api[_\\- ]?key|apikey)[\"'\\s]*[:=]\\s*[\"']?([a-zA-Z0-9\\-_]{16,64})"
+
+# Database Connection Strings
+MONGODB_CONNECTION: "mongodb(\\+srv)?://[^\\s]+"
+POSTGRES_CONNECTION: "postgres(ql)?://[^\\s]+"
+MYSQL_CONNECTION: "mysql://[^\\s]+"
+
+# Private IP Addresses
+PRIVATE_IP: "\\b(?:10\\.(?:[0-9]{1,3}\\.){2}[0-9]{1,3}|172\\.(?:1[6-9]|2[0-9]|3[01])\\.(?:[0-9]{1,3}\\.)[0-9]{1,3}|192\\.168\\.(?:[0-9]{1,3}\\.)[0-9]{1,3})\\b"

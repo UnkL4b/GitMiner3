@@ -1,0 +1,41 @@
+# GitMiner v3 - Labels Configuration
+# Maps regex patterns to human-readable labels for credential detection
+# Format: "regex_pattern": "LABEL_NAME"
+
+# FTP Credentials
+"(?i)(ftp[_\\- ]?user|ftpuser|ftp_login|ftp_username)": "FTP_USER"
+"(?i)(ftp[_\\- ]?pass|ftppassword|ftp_password|ftp_pass)": "FTP_PASS"
+
+# Database Credentials
+"(?i)(db[_\\- ]?user|dbuser|db_username|database_user)": "DB_USER"
+"(?i)(db[_\\- ]?pass|dbpassword|db_password|database_password|DB_PASS)": "DB_PASSWORD"
+
+# API Keys and Tokens
+"(?i)(api[_\\- ]?key|apikey|api_key|token)": "API_KEY"
+
+# AWS Credentials
+"(?i)(aws[_\\- ]?access[_\\- ]?key|aws_access_key_id)": "AWS_ACCESS_KEY"
+"(?i)(aws[_\\- ]?secret|aws_secret_access_key)": "AWS_SECRET_KEY"
+
+# Generic Credentials
+"(?i)(password|passwd|pass)": "PASSWORD"
+"(?i)(username|user)": "USER"
+"(?i)(secret)": "SECRET"
+
+# Private Keys
+"(?i)(private[_\\- ]?key|privatekey)": "PRIVATE_KEY"
+
+# SMTP Credentials
+"(?i)(smtp[_\\- ]?user|smtp_username)": "SMTP_USER"
+"(?i)(smtp[_\\- ]?pass|smtp_password)": "SMTP_PASS"
+
+# OAuth and JWT
+"(?i)(oauth[_\\- ]?token|oauth_key)": "OAUTH_TOKEN"
+"(?i)(jwt[_\\- ]?token|jwt_secret)": "JWT_TOKEN"
+
+# Cloud Services
+"(?i)(azure[_\\- ]?key|azure_secret)": "AZURE_KEY"
+"(?i)(gcp[_\\- ]?key|google_api_key)": "GCP_KEY"
+
+# Database Connection Strings
+"(?i)(connection[_\\- ]?string|conn_str)": "CONNECTION_STRING"

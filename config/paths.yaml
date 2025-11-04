@@ -1,0 +1,41 @@
+# GitMiner v3 - Path Configuration
+# This file defines all directory and file paths used by the application
+
+directories:
+  # Directory for storing downloaded raw files
+  raw_files: "raw"
+  
+  # Directory for generated reports
+  reports: "reports"
+  
+  # Directory for database and persistent data
+  data: "data"
+
+files:
+  # SQLite database filename
+  database: "gitminer_history.sqlite"
+  
+  # Default CSV output filename
+  output_csv: "results.csv"
+  
+  # Labels configuration file
+  labels_config: "config/labels.yaml"
+  
+  # Patterns configuration file
+  patterns_config: "config/patterns.yaml"
+
+github:
+  # GitHub API endpoints
+  search_url: "https://api.github.com/search/code"
+  contents_url: "https://api.github.com/repos/{repo}/contents/{path}"
+  rate_limit_url: "https://api.github.com/rate_limit"
+  
+  # API request settings
+  user_agent: "GitMiner-v3"
+  timeout: 60
+  per_page_default: 30
+  max_results_default: 200
+  
+  # Rate limiting
+  sleep_between_pages: 1.0
+  conservative_wait: 5
