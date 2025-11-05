@@ -32,7 +32,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Dict, Any
 
-from colorama import Fore, init as colorama_init
+from colorama import Fore, Back, init as colorama_init
 from tqdm import tqdm
 
 from gitminer import (
@@ -48,21 +48,21 @@ from gitminer.utils import highlight, extract_keyword_from_query
 colorama_init(autoreset=True)
 
 BANNER = r"""
-██ ▄██ ██ ▄▄▄███ ██   ██ ██ ██   ██ ██ ▄██ ██ ▄██ 
-█▌     █▌   █▌   █▌▌▐▌█▌ █▌ █▌▌  █▌ █▌     █▌   █ 
-█  ▄▄  █    █    █ ▐▌ █  █  █ ▐▌ █  █ ▄█▌  █ ▄█▌  
-▌   ▐  ▌    ▌    ▌    ▌  ▌  ▌  ▐▌▌  ▌      ▌ ▐▌   
-▌▄▄██  ▌    ▌    ▌    ▌  ▌  ▌    ▌  ▌▄▄██  ▌  ▐   v3
-
-       GitHub Secret Scanner & Threat Intel Tool
-       by @UnkL4b | v3.0.0
+   ██ ▄██ ██ ▄▄▄███ ██   ██ ██ ██   ██ ██ ▄██ ██ ▄██
+   █▌     █▌   █▌   █▌▌▐▌█▌ █▌ █▌▌  █▌ █▌     █▌   █
+   █  ▄▄  █    █    █ ▐▌ █  █  █ ▐▌ █  █ ▄█▌  █ ▄█▌
+   ▌   ▐  ▌    ▌    ▌    ▌  ▌  ▌  ▐▌▌  ▌      ▌ ▐▌
+   ▌▄▄██  ▌    ▌    ▌    ▌  ▌  ▌    ▌  ▌▄▄██  ▌  ▐
+                                                    V3
+   GitHub Secret Scanner & Threat Intel Tool
+   by @UnkL4b | v3.0.0
 """
 
 
 class GitMinerApplication:
     """
     Main application class for GitMiner v3.
-    
+
     Orchestrates the workflow of searching GitHub, downloading files,
     analyzing content, and generating reports.
     """
@@ -75,13 +75,13 @@ class GitMinerApplication:
             args: Parsed command-line arguments
         """
         self.args = args
-        
+
         self.config = ConfigManager(
             config_dir=args.config_dir,
             labels_file=args.labels_yaml,
             patterns_file=args.patterns_yaml
         )
-        
+
         self.github_token = self.config.get_github_token()
         if not self.github_token:
             print(highlight(
@@ -90,7 +90,7 @@ class GitMinerApplication:
                 Fore.RED
             ))
             sys.exit(1)
-        
+
         self.github_client = self._initialize_github_client()
         self.file_manager = FileManager(
             base_directory=self.config.get_path('directories', 'raw_files')
@@ -99,16 +99,16 @@ class GitMinerApplication:
             patterns=self.config.get_patterns(),
             labels=self.config.get_labels()
         )
-        
+
         db_path = Path(
             self.config.get_path('directories', 'data')
         ) / self.config.get_path('files', 'database')
         self.database = DatabaseManager(str(db_path))
-        
+
         self.report_generator = ReportGenerator(
             output_directory=self.config.get_path('directories', 'reports')
         )
-        
+
         self.dorks = self._load_dorks()
 
     def _initialize_github_client(self) -> GitHubClient:
@@ -139,7 +139,7 @@ class GitMinerApplication:
         """
         dorks = []
         dorks_input = self.args.dorks
-        
+
         if Path(dorks_input).is_file():
             try:
                 with open(dorks_input, 'r', encoding='utf-8') as file:
@@ -155,45 +155,45 @@ class GitMinerApplication:
                 sys.exit(1)
         else:
             dorks.append(dorks_input)
-        
+
         if not dorks:
             print(highlight(
                 "[!] No valid dorks found. Check your input file or query.",
                 Fore.RED
             ))
             sys.exit(1)
-        
+
         return dorks
 
     def run(self) -> None:
         """
         Execute the main application workflow.
-        
+
         This method orchestrates the entire process: searching, downloading,
         analyzing, and reporting.
         """
         print(highlight(BANNER, Fore.GREEN, bold=True))
         print(highlight(
-            f"[i] Loaded {len(self.dorks)} dork(s)",
-            Fore.CYAN
+            f"[INF] Loaded {Fore.YELLOW}{len(self.dorks)}{Fore.CYAN} dork(s)",
+            Fore.CYAN, bold=True
         ))
-        
+
         all_results = []
-        
+
         for dork in self.dorks:
             print(highlight(
-                f"\n[*] Processing dork: {dork}",
+                f"\n[*] Processing dork:\n └➤ {Fore.YELLOW}{dork}{Fore.MAGENTA}\n",
                 Fore.MAGENTA,
                 bold=True
             ))
-            
+
             search_results = self.github_client.search_code(
                 query=dork,
                 per_page=self.args.per_page,
                 max_results=self.args.max_results,
                 sleep_between_pages=1.0
             )
-            
+
             searched_at = datetime.now(timezone.utc).isoformat()
             self.database.record_search(
                 dork=dork,
@@ -201,26 +201,26 @@ class GitMinerApplication:
                 results_count=len(search_results),
                 downloaded_count=0
             )
-            
+
             dork_results = self._process_search_results(
                 dork=dork,
                 results=search_results,
                 searched_at=searched_at
             )
-            
+
             all_results.extend(dork_results)
-        
+
         self._display_summary(all_results)
-        
+
         if self.args.output_csv:
             self._export_csv(all_results)
-        
+
         if not self.args.no_analyze and all_results:
             self._analyze_files(all_results)
-        
+
         if self.args.report:
             self._generate_reports(all_results)
-        
+
         print(highlight(
             "\n[+] GitMiner execution completed successfully!",
             Fore.GREEN,
@@ -246,29 +246,29 @@ class GitMinerApplication:
         """
         processed_results = []
         keyword = extract_keyword_from_query(dork)
-        
+
         print(highlight(
-            f"[*] Downloading {len(results)} files...",
+            f"[INF] Downloading {Fore.YELLOW}{len(results)}{Fore.RESET} files...",
             Fore.CYAN
         ))
-        
+
         with tqdm(
             total=len(results),
             desc="Downloading files",
             unit="file"
         ) as progress_bar:
-            
+
             for result in results:
                 repository = result['repository']
                 file_path = result['path']
-                
+
                 content = self.github_client.download_file_content(
                     repository=repository,
                     path=file_path
                 )
-                
+
                 local_path = None
-                
+
                 if content:
                     local_path = self.file_manager.save_file(
                         content=content,
@@ -276,7 +276,7 @@ class GitMinerApplication:
                         file_path=file_path,
                         dork_keyword=keyword
                     )
-                    
+
                     if local_path:
                         self.database.record_downloaded_file(
                             dork=dork,
@@ -287,7 +287,7 @@ class GitMinerApplication:
                             searched_at=searched_at,
                             file_size=len(content)
                         )
-                
+
                 result_record = {
                     'dork': dork,
                     'repository': repository,
@@ -297,12 +297,12 @@ class GitMinerApplication:
                     'snippet': result.get('snippet', ''),
                     'keyword': keyword
                 }
-                
+
                 processed_results.append(result_record)
                 progress_bar.update(1)
-                
+
                 time.sleep(0.05)
-        
+
         return processed_results
 
     def _display_summary(self, results: List[Dict[str, Any]]) -> None:
@@ -316,11 +316,11 @@ class GitMinerApplication:
         downloaded_files = sum(
             1 for r in results if r.get('local_path')
         )
-        
+
         print(highlight(
-            f"\n[*] Summary: {total_files} files processed - "
-            f"{downloaded_files} successfully downloaded",
-            Fore.MAGENTA,
+            f"\n[INF] Summary: \n  ├─➤ {Fore.MAGENTA}{total_files}{Fore.RESET} files processed"
+            f"\n  └─➤ {Fore.GREEN}{downloaded_files}{Fore.RESET} successfully downloaded",
+            Fore.CYAN,
             bold=True
         ))
 
@@ -332,7 +332,7 @@ class GitMinerApplication:
             results: List of processed results
         """
         csv_path = self.args.output_csv
-        
+
         try:
             with open(csv_path, 'w', newline='', encoding='utf-8') as file:
                 writer = csv.DictWriter(
@@ -343,7 +343,7 @@ class GitMinerApplication:
                     ]
                 )
                 writer.writeheader()
-                
+
                 for result in results:
                     writer.writerow({
                         'dork': result.get('dork', ''),
@@ -353,12 +353,12 @@ class GitMinerApplication:
                         'url': result.get('url', ''),
                         'snippet': result.get('snippet', '')
                     })
-            
+
             print(highlight(
                 f"[+] Results exported to CSV: {csv_path}",
                 Fore.GREEN
             ))
-            
+
         except Exception as error:
             print(highlight(
                 f"[!] Error exporting CSV: {error}",
@@ -372,79 +372,75 @@ class GitMinerApplication:
         Args:
             results: List of processed results
         """
-        print(highlight(
-            "\n[*] Analyzing downloaded files for sensitive patterns...",
-            Fore.CYAN,
-            bold=True
-        ))
         
+
         grouped = {}
         for result in results:
             dork = result.get('dork', '')
             if dork not in grouped:
                 grouped[dork] = []
             grouped[dork].append(result)
-        
+
         for dork, dork_results in grouped.items():
             keyword = extract_keyword_from_query(dork)
-            
+
             print(highlight(
-                f"\n[*] Analyzing dork: {dork} | Keyword: {keyword}",
+                f"\n[+] Results",
                 Fore.MAGENTA
             ))
-            
+
             total_matches = 0
-            
+
             for result in dork_results:
                 local_path = result.get('local_path')
-                
+
                 if not local_path:
                     continue
-                
+
                 keyword_matches = self.pattern_analyzer.search_keyword_in_file(
                     file_path=local_path,
                     keyword=keyword,
                     case_sensitive=False
                 )
-                
+
                 pattern_findings = self.pattern_analyzer.scan_file(
                     file_path=local_path
                 )
-                
+
                 if keyword_matches or pattern_findings:
                     print(highlight(
-                        f"\n[FILE] {local_path}",
+                        f"\n[FILE] {local_path}\n",
                         Fore.CYAN,
                         bold=True
                     ))
-                    
+
                     if keyword_matches:
                         for line_no, line_content in keyword_matches[:10]:
                             print(
-                                f"{Fore.YELLOW}  L{line_no:5d} | "
-                                f"{Fore.WHITE}{line_content}"
+                                f"{Fore.YELLOW}  >{line_no:5d} | "
+                                f"{Fore.BLACK}{Back.WHITE}{line_content}"
                             )
                         total_matches += len(keyword_matches)
-                    
+
                     if pattern_findings:
                         print(highlight(
-                            "  >> Pattern Detection Results:",
+                            "\n   [INF] Pattern Detection Results:\n",
                             Fore.MAGENTA
                         ))
-                        
+
                         for label, matched, context, line_no in pattern_findings[:10]:
                             severity = self.pattern_analyzer.classify_severity(
                                 label
                             )
-                            line_display = f"L{line_no:5d}" if line_no else "L  ???"
-                            
+                            line_display = f">{line_no:5d}" if line_no else ">  ???"
+
                             print(
                                 f"{Fore.RED}   [{severity}] [{label}] "
-                                f"{line_display} -> {Fore.WHITE}{matched[:80]}"
+                                f"{line_display} | {Fore.WHITE}{matched[:80]}"
                             )
-                        
+
                         total_matches += len(pattern_findings)
-            
+
             if total_matches == 0:
                 print(highlight(
                     f"[i] No matches found for '{keyword}' in downloaded files.",
@@ -463,28 +459,28 @@ class GitMinerApplication:
             Fore.CYAN,
             bold=True
         ))
-        
+
         grouped = {}
         for result in results:
             dork = result.get('dork', '')
             if dork not in grouped:
                 grouped[dork] = []
             grouped[dork].append(result)
-        
+
         for dork, dork_results in grouped.items():
             all_findings = []
-            
+
             for result in dork_results:
                 local_path = result.get('local_path')
-                
+
                 if not local_path:
                     continue
-                
+
                 findings = self.pattern_analyzer.scan_file(local_path)
-                
+
                 for label, matched, context, line_no in findings:
                     severity = self.pattern_analyzer.classify_severity(label)
-                    
+
                     finding_tuple = (
                         severity,
                         label,
@@ -496,9 +492,9 @@ class GitMinerApplication:
                         local_path,
                         result.get('url', '')
                     )
-                    
+
                     all_findings.append(finding_tuple)
-            
+
             if all_findings:
                 self.report_generator.generate_report(
                     dork=dork,
@@ -523,13 +519,13 @@ def parse_arguments() -> argparse.Namespace:
 Examples:
   # Search using a single dork
   python3 gitminer_v3.py -d "filename:.env DB_PASSWORD"
-  
+
   # Search using multiple dorks from file
   python3 gitminer_v3.py -d dorks.txt -m 500 --report
-  
+
   # Export results to CSV
   python3 gitminer_v3.py -d dorks.txt -o results.csv
-  
+
   # Skip analysis and only download
   python3 gitminer_v3.py -d dorks.txt --no-analyze
 
@@ -537,18 +533,18 @@ Environment Variables:
   GITHUB_TOKEN    GitHub personal access token (required)
         """
     )
-    
+
     parser.add_argument(
         '-d', '--dorks',
         required=True,
         help='File containing dorks (one per line) or single dork query string'
     )
-    
+
     parser.add_argument(
         '-t', '--token',
         help='GitHub token (alternatively use GITHUB_TOKEN env variable)'
     )
-    
+
     parser.add_argument(
         '-m', '--max-results',
         type=int,
@@ -556,7 +552,7 @@ Environment Variables:
         dest='max_results',
         help='Maximum results per dork (default: 200)'
     )
-    
+
     parser.add_argument(
         '-p', '--per-page',
         type=int,
@@ -564,45 +560,45 @@ Environment Variables:
         dest='per_page',
         help='Results per page for GitHub API (default: 30, max: 100)'
     )
-    
+
     parser.add_argument(
         '-o', '--output-csv',
         dest='output_csv',
         help='Export results summary to CSV file'
     )
-    
+
     parser.add_argument(
         '--report',
         action='store_true',
         help='Generate threat intelligence reports in Markdown format'
     )
-    
+
     parser.add_argument(
         '--no-analyze',
         action='store_true',
         dest='no_analyze',
         help='Skip local file analysis (only download files)'
     )
-    
+
     parser.add_argument(
         '--config-dir',
         default='config',
         dest='config_dir',
         help='Configuration directory (default: config)'
     )
-    
+
     parser.add_argument(
         '--labels-yaml',
         dest='labels_yaml',
         help='Custom labels YAML file (overrides default)'
     )
-    
+
     parser.add_argument(
         '--patterns-yaml',
         dest='patterns_yaml',
         help='Custom patterns YAML file (overrides default)'
     )
-    
+
     return parser.parse_args()
 
 
@@ -614,14 +610,14 @@ def main() -> None:
         args = parse_arguments()
         app = GitMinerApplication(args)
         app.run()
-        
+
     except KeyboardInterrupt:
         print(highlight(
             "\n[!] Execution interrupted by user.",
             Fore.YELLOW
         ))
         sys.exit(0)
-        
+
     except Exception as error:
         print(highlight(
             f"\n[!] Fatal error: {error}",
