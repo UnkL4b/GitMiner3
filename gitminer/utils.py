@@ -12,11 +12,7 @@ from typing import Optional
 from colorama import Fore, Style
 
 
-def highlight(
-    text: str,
-    color: str = Fore.CYAN,
-    bold: bool = False
-) -> str:
+def highlight(text: str, color: str = Fore.CYAN, bold: bool = False) -> str:
     """
     Apply color and style formatting to text for terminal output.
 
@@ -47,11 +43,11 @@ def sanitize_filename(filename: str) -> str:
         Sanitized filename safe for use across platforms
     """
     filename = unicodedata.normalize('NFKD', filename)
-    
+
     filename = re.sub(r'[<>:"/\\|?*]', '_', filename)
-    
+
     filename = filename.replace('..', '_')
-    
+
     return filename
 
 
@@ -76,7 +72,7 @@ def extract_keyword_from_query(query: str) -> str:
     )
     if match:
         return match.group(1).strip().strip('"\'')
-    
+
     match = re.search(
         r'extension\s*:\s*([^\s]+)',
         query,
@@ -84,13 +80,13 @@ def extract_keyword_from_query(query: str) -> str:
     )
     if match:
         return match.group(1).strip().strip('"\'')
-    
+
     match = re.search(r'"([^"]{2,100})"', query)
     if match:
         return match.group(1)
-    
+
     tokens = re.split(r'\s+', query)
-    
+
     tokens = [
         token for token in tokens
         if not re.match(
@@ -100,7 +96,7 @@ def extract_keyword_from_query(query: str) -> str:
         )
     ]
     tokens = [token for token in tokens if len(token) >= 3]
-    
+
     return tokens[0] if tokens else query
 
 
