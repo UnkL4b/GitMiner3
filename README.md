@@ -23,7 +23,7 @@
 
 ### GITMINER 3
 
-GitMiner v3 is a modular, object-oriented tool designed for discovering sensitive information in public GitHub repositories. It uses advanced dork queries, regex pattern matching, and generates comprehensive threat intelligence reports.
+GitMiner v3 is a modular tool designed for discovering sensitive information in public GitHub repositories. It uses advanced dork queries, regex pattern matching, and generates comprehensive threat intelligence reports.
 
 This project is a complete refactoring of the original [Gitminer](https://github.com/UnkL4b/GitMiner) script, focusing on maintainability, scalability, and professional software architecture principles.
 
